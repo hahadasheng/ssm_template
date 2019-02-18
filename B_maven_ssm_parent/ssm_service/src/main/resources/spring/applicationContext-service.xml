@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+    <!-- service层配置文件 开始 -->
+    <!-- 1. 组件扫描配置 -->
+    <context:component-scan base-package="com.itheima.service"/>
+
+    <!-- aop面向切面编程，切面就是切入点和通知的组合 -->
+    <!-- 2. 配置事务管理器：增强过程函数 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+     </bean>
+    
+    <!-- 3. 配置事务通知 -->
+    <tx:advice id="advice">
+        <tx:attributes>
+            <!-- 增删改都支持事务，以一下开头的方法执行， -->
+            <tx:method name="save*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="find*" read-only="true"/>
+            <!-- 其他方法以非find开头，也会使用事务 -->
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 4. 配置切面 -->
+    <aop:config>
+        <aop:pointcut id="pointcut" expression="execution(* com.itheima.service.impl.*.*(..))"/>
+        <aop:advisor advice-ref="advice" pointcut-ref="pointcut"/>
+    </aop:config>
+    <!-- service层配置文件 结束 -->
+
+    <!-- 开始：下面语句是为了junit单元测试而引入的，测试时请打开注释；测试完毕后请删除！ -->
+    <!--<import resource="classpath:spring/applicationContext-dao.xml"/>-->
+    <!-- 结束： -->
+</beans>
